@@ -1,0 +1,23 @@
+{
+    "panda-version": [0, 4, 0],
+    "project": {
+        "name": "gb-emu",
+        "version": [0, 0, 1],
+        "type": "bin"
+    },
+    "debug": {
+        "cxxflags": "-Wall -Wextra -Werror -std=c++20 -I src -g",
+        "ldflags": "-lSDL2"
+    },
+    "fast-debug": {
+        "cxxflags": "-Wall -Wextra -Werror -std=c++20 -I src -O3 -march=native -g",
+        "ldflags": "-lSDL2"
+    },
+    "release": {
+        "cxxflags": "-Wall -Wextra -Werror -std=c++20 -I src -O3 -march=native -fno-exceptions -fno-rtti -flto=full",
+        "ldflags": "-flto=full"
+    },
+    "general": {
+        "cxx": "zig c++"
+    }
+}
