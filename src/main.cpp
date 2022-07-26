@@ -16,11 +16,6 @@
 #include <TestCode.h>
 #include <TestScene.h>
 
-#ifdef NDEBUG
-#define BARE
-#endif
-
-#ifndef BARE
 static constexpr const int g_scale_factor = 8;
 static constexpr const int g_physical_width = GB::viewport_width*g_scale_factor;
 static constexpr const int g_physical_height = GB::viewport_height*g_scale_factor;
@@ -41,15 +36,8 @@ static void update_renderer(SDL::Renderer& renderer,
 
 static auto instance = SDL::Instance();
 
-#endif
-
 int main(int argc, c_string argv[])
 {
-#ifdef BARE
-    (void)argc;
-    (void)argv;
-#endif
-#ifndef BARE
     auto cli = Cli();
     auto show_gui = true;
     cli.on_argument("--no-gui", [&show_gui] {
@@ -64,9 +52,7 @@ int main(int argc, c_string argv[])
     
     auto event_handler = GUI::EventHandler(window);
 
-#endif
     bool should_quit = false;
-#ifndef BARE
     event_handler.on_quit([&should_quit] {
         should_quit = true;
     });
@@ -74,13 +60,10 @@ int main(int argc, c_string argv[])
     event_handler.on_key_down(SDLK_SPACE, [&debug_mode] {
         debug_mode = !debug_mode;
     });
-#endif
     auto memory = GB::Memory(TestCode::code,
                              TestCode::code_size,
                              GB::LogInvalidAccess::Yes);
-#ifndef BARE
     setup_gb_keys(event_handler, memory);
-#endif
 
     auto cpu = GB::CPU(memory,
                        GB::PrintAssembly::Yes,
@@ -89,7 +72,6 @@ int main(int argc, c_string argv[])
     // cpu.run(GB::PrintAssembly::Yes);
     // cpu.run();
 
-#ifndef BARE
     auto renderer = SDL::Renderer::create(window);
     Defer destroy_renderer = [&renderer] {
         renderer.destroy();
@@ -157,9 +139,7 @@ int main(int argc, c_string argv[])
         if (show_gui)
             Terminal::hide_cursor(false);
     };
-#endif
     while (!should_quit) {
-#ifndef BARE
         event_handler.handle_events();
         handle_inputs();
 
@@ -169,7 +149,6 @@ int main(int argc, c_string argv[])
             auto frame_time = end_time - start_time;
             SDL_Delay(uint8_t(1000/60 - frame_time));
         };
-#endif
 
         if (cpu.pc >= memory.rom_size())
             break;
@@ -183,7 +162,6 @@ int main(int argc, c_string argv[])
         }
         cpu.run_next_cycles(GB::hblank_cycles);
 
-#ifndef BARE
         canvas.clear();
         scene.draw_on(canvas);
         update_renderer(renderer, texture, canvas,
@@ -191,17 +169,13 @@ int main(int argc, c_string argv[])
                         scroll_x, scroll_y,
                         debug_mode);
         renderer.present();
-#endif
     }
 
-#ifndef BARE
     getchar();
-#endif
 
     return 0;
 }
 
-#ifndef BARE
 void setup_gb_keys(GUI::EventHandler& event_handler,
                    GB::Memory& mmio)
 {
@@ -276,4 +250,3 @@ static void update_renderer(SDL::Renderer& renderer,
             renderer.copy(texture, { 0, 0, canvas.viewport_width(), canvas.viewport_height() }, rects[i]);
     }
 }
-#endif
